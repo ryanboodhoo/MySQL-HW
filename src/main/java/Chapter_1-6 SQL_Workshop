@@ -1,3 +1,5 @@
+Chapter 1 SQL Basics
+
 Basics about SQL:
   Many organizations manage large amounts of data. This can be better managed with a database and SQL rather than a spreadsheet. Structured data is easy to process and can be stored in a relational database in which the data have defined relationships to each other.
 
@@ -23,5 +25,1274 @@ Basics about SQL:
    - The INSERT INTO statement is used to add data to a table.
    - You can insert one row.
 
-   Chapter 2
+   CREATE TABLE Products (
+       ProductID INT PRIMARY KEY,
+       ProductCategoryID INT,
+       SupplierID INT,
+       ProductName VARCHAR(255),
+       NetRetailPrice DECIMAL(10, 2),
+       AvailableQuantity INT,
+       WholesalePrice DECIMAL(10, 2),
+       UnitKGWeight DECIMAL(10, 3),
+       Notes VARCHAR(50)
+   );
+
+
+   INSERT INTO Products (ProductID, ProductCategoryID, SupplierID, ProductName, NetRetailPrice, AvailableQuantity, WholesalePrice, UnitKGWeight, Notes)
+   VALUES
+       (1, 5, 2, 'Calculate', 24.99, 100, 17.99, 1.000, 'calculation application'),
+       (2, 5, 5, 'Penwrite', 79.99, 27, 49.99, 2.000, 'word processing product'),
+       (3, 1, 6, 'Vortex Generator', 2499.99, 1000, 1999.99, 0.010, 'space engine component'),
+       (4, 1, 6, 'The Gourmet Crackpot', 24.99, 72, 19.99, 1.630, 'cookbook'),
+       (5, 1, 6, 'Government Accounting', 14.99, 26, 9.99, 1.220, 'government accounting book'),
+       (6, 3, 6, 'Habanero peppers', 4.49, 189, 2.99, 0.009, 'hot peppers'),
+       (7, 2, 1, '10-mm socket wrench', 3.49, 39, 1.89, 0.018, 'important tool'),
+       (8, 3, 4, 'tomato sauce', 1.19, 1509, 0.89, 0.232, 'bottled in glass'),
+       (9, 1, 6, 'pure vanilla', 10.39, 1509, 7.89, 0.032, 'high-quality vanilla'),
+       (10, 3, 2, 'keyboard wrench', 399999.95, 6128, 149999.99, 521.380, 'handle with care'),
+       (11, 2, 1, 'power cell', 47.89, 2346, 29.99, 0.298, 'ten amp-hours per cell');
+
+
+   SELECT * FROM Products;
+
+
+   Chapter 2 Manipulating data
+
+   The Insert Operation
+
+The INSERT operation is used to add a record to a table. Key points to note include:
+
+- It's not necessary to provide data for every column unless there is a constraint, and some columns may have default values.
+
+- System-generated values should not be altered.
+
+- Column values must align with the order, data type, and size requirements.
+
+- String, date-time, and character values should be enclosed in quotes, while numbers should not.
+
+- If column names aren't specified, all columns must have corresponding values, maintaining the correct sequence.
+
+- The INSERT operation can only add data to one table at a time.
+
+ DROP TABLE IF EXISTS:
+DROP TABLE IF EXISTS department;
+CREATE TABLE department (
+ departmentNo INT PRIMARY KEY AUTO_INCREMENT,
+ departmentName VARCHAR(20) NOT NULL,
+ departmentLoc VARCHAR(50) DEFAULT 'NJ',
+ departmentEstDate DATETIME DEFAULT NOW()
+);
+
+Here we have provided default values for departmentLoc and departmentEstDate.
+The departmentNo column is an auto-increment column
+
+Now():\; returns th current date and time told in year-month-day-hour-mins-seconds as a string
+mysql> Select NOW();
++---------------------+
+| NOW()               |
++---------------------+
+| 2024-12-15 08:24:42 |
++---------------------+
+
+ CREATE TABLE AS SELECT * FROM:
+ CREATE TABLE departmentdemo AS
+  SELECT *
+  FROM department;
+
+  The DELETE operation in SQL removes one or more rows from a table.
+  It only works on a single table at a time, and the changes are permanent, so caution is advised.
+  Many database tools require a WHERE clause in the DELETE FROM statement to specify which rows to delete.
+
+  To delete all rows, a universally true condition can be used.
+  For example:
+
+  - To delete an employee with `empno = 1234`:
+    `DELETE FROM employees WHERE empno = 1234;`
+
+  - To remove the top 5 rows:
+    `DELETE FROM employees LIMIT 5;`
+
+    ---To delete the product tomato sauce from the PACKT_ONLINE_SHOP database, follow these steps:
+
+    Inspect the Products Table: Verify that the product tomato sauce exists in the table with a ProductID of 8.
+
+    Execute the DELETE Query:
+    Open a new query tab and run the following command:
+
+
+    USE PACKT_ONLINE_SHOP;
+    DELETE FROM products
+    WHERE ProductName = 'tomato sauce';
+    Handling Safe Mode:
+    If you encounter an error due to Safe Mode:
+
+    Go to Edit > Preferences > SQL Editor and uncheck the Safe mode option.
+    Reconnect to the database and re-run the query.
+    This will remove the entire row for the product tomato sauce.
+
+Delete Rows: Remove rows where departmentNo > 2:
+
+DELETE FROM department WHERE departmentNo > 2;
+Preview Rows: View the remaining rows in the department table.
+
+Insert a New Row: Add the Sales department:
+
+INSERT INTO department(departmentname, departmentLoc)
+VALUES ('Sales', 'LV');
+Check Auto-Increment Value: The auto-increment value starts at 5 after inserting the new row.
+
+Delete the Newly Inserted Row:
+
+DELETE FROM department WHERE departmentNo = 5;
+Reset Auto-Increment Value: Set the auto-increment column to start at 3:
+
+ALTER TABLE department AUTO_INCREMENT = 3;
+Re-Insert Sales Department:
+
+
+INSERT INTO department(departmentname, departmentLoc)
+VALUES ('Sales', 'LV');
+SELECT * FROM department;
+The Sales department will now be added with departmentNo = 3.
+
+
+---The UPDATE statement modifies data in one or more columns of a table. It uses the SET clause to specify the updated values and the WHERE clause to filter the rows to be updated. Without a WHERE clause, all rows in the table are updated.
+
+Key Examples:
+Updating a Single Row:
+To update a specific employee's email:
+
+  UPDATE employees
+SET Email = 'Ava-May.Rodgers@awesomenes.com'
+WHERE empno = 3;
+Updating All Rows:
+To set the departmentEstDate for all rows in the department table to the current date:
+
+  UPDATE department
+SET departmentEstDate = NOW();
+Updating Multiple Columns:
+To update the department location and set the date to the next day:
+
+
+ UPDATE department
+SET departmentLoc = 'GA', departmentEstDate = NOW() + INTERVAL 1 DAY;
+Using Aliases:
+Aliases simplify queries, especially with long table names. For example:
+
+  UPDATE department D
+SET D.departmentLoc = 'NYC',
+    D.departmentEstDate = NOW() + INTERVAL 1 DAY;
+Conditional Updates:
+To update all employees in the sales department (department number 3) with a new commission:
+
+
+UPDATE employees
+SET comm = 2000
+WHERE departno = 3;
+Limiting Updates:
+The LIMIT clause can restrict the number of rows updated. For example, updating the three lowest-paid employees with commissions less than or equal to 500:
+
+UPDATE employees
+SET comm = 1000
+WHERE empno IN (
+    SELECT empno FROM (
+        SELECT empno
+        FROM employees
+        WHERE comm <= 500
+        ORDER BY salary DESC, comm ASC
+        LIMIT 0, 3
+    ) stg
+);
+Notes:
+The +INTERVAL n DAY adds days to a date value.
+Subqueries (a SELECT inside another SELECT) are useful for complex filtering and will be covered later.
+
+o apply a 10% discount on the net retail price of all products in the PACKT_ONLINE_SHOP database, follow these steps:
+
+Update the Prices: Execute the following query to reduce the NetRetailPrice by 10%:
+
+
+UPDATE products
+SET NetRetailPrice = NetRetailPrice * 0.90;
+Verify the Changes: Inspect the contents of the products table to ensure the prices have been updated:
+
+
+SELECT * FROM products;
+After executing these commands, the table will reflect the updated prices, where each product's NetRetailPrice is now 90% of its original value.
+
+The DROP Operation Summary:
+The DROP command is used to delete an entire schema (e.g., a table) from the database. Once a table is dropped, it cannot be queried or recovered without backups.
+
+Syntax:
+
+
+DROP TABLE <table_name>;
+Example:
+To delete the Customers table from the packt_online_database:
+
+
+DROP TABLE Customers;
+Attempting to query the Customers table after this operation will result in an error because the table no longer exists.
+
+Activity 2.01: Inserting Additional Products into the Products Table
+To add new products to the products table with specified attributes:
+
+Requirements:
+
+Products: Pancake batter, Breakfast cereal, Siracha sauce
+Retail price: 5.99
+Wholesale price: 3.99
+Product category: 1 (default)
+Product ID: Auto-incremented
+Query:
+
+
+INSERT INTO products (ProductName, NetRetailPrice, NetWholesalePrice, ProductCategory)
+VALUES
+('Pancake batter', 5.99, 3.99, 1),
+('Breakfast cereal', 5.99, 3.99, 1),
+('Siracha sauce', 5.99, 3.99, 1);
+Chapter Summary:
+INSERT: Used to add data into tables, including advanced implementations.
+UPDATE: Modifies existing data within a table.
+ALTER: Updates schemas (e.g., adding/deleting columns, renaming tables).
+DROP: Permanently deletes schemas (e.g., tables).
+
+It’s crucial to handle changes to data and schemas carefully to avoid inconsistencies.
+The next chapter will focus on normalizing data to maintain data integrity.
+
+
+Chapter 3 Normalization
+
+Relational Model Overview:
+A database server can contain multiple databases.
+Databases consist of user-defined tables and system objects.
+Tables are collections of rows (entities) and columns (attributes).
+Relations between tables are established using keys, ensuring logical connections and data integrity.
+Referential Constraints:
+Primary Key Constraints:
+Ensure column entries are unique within a table. Composite primary keys can combine multiple columns to enforce uniqueness when a single column is insufficient.
+Example: A combination of tongue print, fingerprint, and retinal signature can serve as a composite primary key.
+
+Foreign Key Constraints:
+A primary key from one table referenced in another becomes its foreign key, establishing relationships between tables. This enforces data consistency across tables.
+
+Example: PACKT_ONLINE_SHOP Database
+Customers Table:
+Contains details like CustomerID (primary key), FirstName, LastName, Address, and other customer-related attributes.
+
+
+PRIMARY KEY (CustomerID)
+Orders Table:
+Stores order details with OrderID (primary key) and a CustomerID foreign key referencing the primary key in the Customers table. This links orders to customers.
+
+
+FOREIGN KEY FK_Customer_CustomerID(CustomerID) REFERENCES Customers(CustomerID)
+By normalizing the database, relational constraints like primary keys and foreign keys maintain data consistency and optimize data management.
+
+Table Relationships:
+Customers and Orders:
+
+One-to-Many Relationship: Each customer can place multiple orders, but each order belongs to a single customer.
+The Orders table contains a CustomerID column, which acts as:
+A primary key in the Customers table.
+A foreign key in the Orders table, linking orders to customers.
+Orders and Products:
+
+Many-to-Many Relationship:
+One order can include multiple products.
+A single product can appear in multiple orders.
+Key Points about Foreign Keys:
+A foreign key always references a primary key in another table.
+A table can have multiple foreign keys to establish relationships with different parent tables.
+INSERT Commands:
+Rows can only be added to the child table if a corresponding row exists in the parent table.
+DELETE Commands:
+Rows can only be deleted from the parent table if no related rows exist in the child table.
+SQL Behavior:
+In MySQL, foreign key constraints automatically create an index corresponding to the foreign key.
+In SQL Server, foreign key constraints do not create an index automatically, but primary key constraints do.
+Example Scenario:
+In a store like Packt, where customers purchase books or courses, the relationships ensure that:
+
+Every order is linked to a valid customer.
+Products included in an order are correctly tracked to prevent inconsistencies.
+This design ensures a robust and reliable database structure that enforces data integrity through normalization.
+
+DROP DATABASE IF EXISTS employeedemo;
+CREATE DATABASE employeedemo;
+Create the department Table: This table will store department details, ensuring referential integrity with the employee table using the dno field as a foreign key in the employee table.
+
+
+USE employeedemo;
+
+CREATE TABLE department
+(
+  dno INT PRIMARY KEY,
+  dname VARCHAR(30) UNIQUE NOT NULL,
+  dlocation VARCHAR(30) UNIQUE NOT NULL
+);
+Create the employee Table: This table stores employee details, with constraints on the gender field and default values for salary and commission. It also references the department table to establish the relationship.
+
+
+CREATE TABLE employee
+(
+  eno CHAR(4) PRIMARY KEY,
+  ename VARCHAR(30) NOT NULL,
+  job VARCHAR(30) NOT NULL,
+  manager CHAR(4),
+  jdate TIMESTAMP NOT NULL,
+  gender CHAR(1) CONSTRAINT gender_chk CHECK (gender IN ('M', 'F')),
+  salary DECIMAL(8, 2) DEFAULT 0,
+  commission DECIMAL(8, 2) DEFAULT 0,
+  deptno INT NOT NULL,
+  FOREIGN KEY (deptno) REFERENCES department(dno)
+);
+Foreign Key Constraints: The employee table uses a foreign key (deptno) to reference the dno field in the department table, establishing the relationship between the two tables.
+Check Constraint: The gender field is constrained to only allow 'M' (Male) or 'F' (Female).
+Denormalization Example: Building the Orders and OrderItems Tables
+Next, for the Packt Online Shop example, two tables are needed:
+
+OrderItems Table (Captures product specifics):
+
+OrderItemID
+OrderID (Foreign key to Orders)
+ProductID
+Quantity
+UnitPrice
+Discount
+Notes
+
+CREATE TABLE OrderItems
+(
+  OrderItemID INT PRIMARY KEY,
+  OrderID INT NOT NULL,
+  ProductID INT NOT NULL,
+  Quantity INT NOT NULL,
+  UnitPrice DECIMAL(10, 2) NOT NULL,
+  Discount DECIMAL(5, 2),
+  Notes VARCHAR(500),
+  FOREIGN KEY (OrderID) REFERENCES Orders(OrderID)
+);
+Orders Table (Captures order details):
+
+OrderID
+CustomerID
+OrderNumber
+OrderDate
+ShipmentDate
+OrderStatus
+Notes
+
+CREATE TABLE Orders
+(
+  OrderID INT PRIMARY KEY,
+  CustomerID INT NOT NULL,
+  OrderNumber CHAR(50) NOT NULL,
+  OrderDate DATETIME NOT NULL,
+  ShipmentDate DATETIME,
+  OrderStatus CHAR(10),
+  Notes VARCHAR(750),
+  FOREIGN KEY (CustomerID) REFERENCES Customers(CustomerID)
+);
+Summary of Key Concepts in This Chapter:
+Constraints for Data Integrity:
+
+Primary Keys ensure uniqueness.
+Foreign Keys establish relationships between tables.
+Check Constraints validate data according to rules (e.g., gender being 'M' or 'F').
+Default Values help maintain consistency (e.g., default salary and commission values).
+Normalization:
+
+Helps ensure data integrity and reduces redundancy.
+The chapter explains First, Second, and Third Normal Forms (1NF, 2NF, and 3NF) in detail, helping design efficient databases.
+Building Relationships and Normalized Schema:
+
+By creating foreign key constraints, we maintain data consistency across tables (e.g., the relationship between Orders and OrderItems, or between Customers and Orders).
+
+
+   Chapter 4 The SELECT Statement
+
+   Introduction to SQL SELECT Statement
+   In SQL, the SELECT statement is the primary tool for querying a database and retrieving specific data. This chapter focuses on customizing the SELECT statement to fetch only the necessary data, rather than retrieving entire tables, which is often unnecessary.
+
+   The basic structure of a SELECT query is:
+
+
+   SELECT [COLUMNS_LIST]
+   FROM [TABLE_NAME]
+   WHERE [CONDITION]
+   ORDER BY [COLUMN_NAME] [ASC | DESC]
+   Parts of the SELECT Statement:
+   [COLUMNS_LIST]: Specifies the columns you want to retrieve from the table. You can list multiple columns separated by commas. If you want to retrieve all columns, you use the wildcard *.
+
+   [TABLE_NAME]: The name of the table from which you are fetching the data.
+
+   [CONDITION]: This optional part is used to filter the data, ensuring that only the rows meeting the specified criteria are returned. We will discuss this part in detail in the next chapter.
+
+   [COLUMN_NAME] [ASC | DESC]: If you want to sort the result set, you can use the ORDER BY clause. The sorting can be either ascending (ASC) or descending (DESC).
+
+   Example: Retrieving All Columns from a Table
+   In the given example, the store manager of PACKT_ONLINE_SHOP wants to retrieve information about all the product categories. The following SQL query retrieves all columns from the ProductCategories table:
+
+
+   USE PACKT_ONLINE_SHOP;
+   SELECT * FROM ProductCategories;
+   *: The asterisk here is a wildcard that means "all columns."
+   Output: This query will return all rows and columns in the ProductCategories table, showing full details about each product category.
+   SELECT Without FROM
+   In some cases, you may use the SELECT statement without the FROM part. For example, when calling functions or retrieving a single value:
+
+
+   SELECT GETDATE();
+   This query will return the current date and time.
+
+   Summary
+   The SELECT statement is used to retrieve data from a database.
+   You can specify individual columns or use * to retrieve all columns.
+   The query can be customized with WHERE (for filtering), ORDER BY (for sorting), and other SQL clauses.
+   In some cases, you can call functions using just the SELECT statement without needing to specify a table.
+   In the following sections of the chapter, we will explore these components in more detail and practice writing queries that combine all of them
+
+   USE PACKT_ONLINE_SHOP;
+   Enter the Query to retrieve specific columns:
+
+   SELECT ProductCategoryID, ProductCategoryName
+   FROM ProductCategories;
+   Execute the Query. The result will display only the selected columns, ProductCategoryID and ProductCategoryName.
+   If you want to display the columns in a different order, you can simply change their order in the query:
+
+
+   SELECT ProductCategoryName, ProductCategoryID
+   FROM ProductCategories;
+   This will result in the ProductCategoryName appearing first, followed by ProductCategoryID.
+
+   Using Naming Aliases
+   By default, the column names in the result set will match the original column names in the database. However, when creating reports, it’s often better to use more user-friendly or clearer names for the columns. This can be achieved by using aliasing.
+
+   The syntax for aliasing a column is:
+
+   SELECT [Original Column Name] AS [New Column Name]
+   Exercise 4.02: Aliasing the Column Headers
+   To make the column headers more descriptive, we can alias the columns as CATEGORY and ID. Here’s how:
+
+   Enter the Query with Aliases:
+
+
+   SELECT ProductCategoryName AS CATEGORY, ProductCategoryID AS ID
+   FROM ProductCategories;
+   Execute the Query. The result will show the columns with the new aliases:
+
+   ProductCategoryName becomes CATEGORY.
+   ProductCategoryID becomes ID.
+   Handling Multiple Words in Aliases: If you want to use multi-word column names for clarity, enclose the alias in single quotes. For example:
+
+
+   SELECT ProductCategoryName AS 'PRODUCT CATEGORY', ProductCategoryID AS ID
+   FROM ProductCategories;
+   The result will display PRODUCT CATEGORY as the column header for the product names, making the output more readable.
+
+   Summary
+   Selecting specific columns: By listing only the required columns in the SELECT clause, you can retrieve only the necessary data, which improves the query's efficiency.
+   Aliasing columns: Using the AS keyword, you can rename columns in the output to make them more meaningful or user-friendly.
+
+   Displaying Particular Columns from the Table
+   To create a report for a telephone survey of PACKT_ONLINE_SHOP customers, we need to retrieve specific details such as the first name, last name, and contact number of each customer. The column headers in the report should be "First Name," "Last Name," and "Phone Number."
+
+   Here’s how to do it:
+
+   Switch to the Required Database:
+
+
+   USE PACKT_ONLINE_SHOP;
+   Retrieve the Required Columns: You can select the required columns from the Customers table as follows:
+
+
+   SELECT FirstName AS 'First Name', LastName AS 'Last Name', Phone AS 'Phone Number'
+   FROM Customers;
+   This query will output the first name, last name, and phone number of all customers, with more user-friendly column headers as specified.
+
+   Ordering Results
+   Sorting or ordering results is a common requirement to make the data more readable and meaningful. The ORDER BY clause in SQL is used to sort the result set in ascending or descending order, either numerically or alphabetically. By default, results are sorted in ascending order unless specified otherwise.
+
+   Syntax for ORDER BY:
+
+   ORDER BY [COLUMN1 NAME] [ASC|DESC], [COLUMN2 NAME] [ASC|DESC]
+   Where:
+
+   [COLUMN1 NAME] is the column by which to sort the results.
+   [ASC|DESC] specifies ascending or descending order. If ASC is omitted, it’s assumed by default.
+   Ordering Rows According to a Particular Column
+   Let's say we want to order the ProductCategories table by ProductCategoryName in ascending order. The query would look like this:
+
+
+   SELECT ProductCategoryName AS 'CATEGORY NAME', ProductCategoryID AS ID
+   FROM ProductCategories
+   ORDER BY ProductCategoryName ASC;
+   This sorts the ProductCategoryName alphabetically in ascending order. If you want to sort in descending order instead, use DESC:
+
+   SELECT ProductCategoryName AS 'CATEGORY NAME', ProductCategoryID AS ID
+   FROM ProductCategories
+   ORDER BY ProductCategoryName DESC;
+   This will display the product categories sorted in reverse alphabetical order.
+
+   Ordering Rows According to Multiple Columns
+   Sometimes, you might want to sort by multiple columns. If multiple records have the same value in the first column, SQL will use the second column to further sort the rows.
+
+   For example, consider the Customers table where we want to order by FirstName in ascending order, but if there are multiple customers with the same first name, we’ll then order by CustomerID in descending order.
+
+
+   SELECT FirstName, CustomerID
+   FROM Customers
+   ORDER BY FirstName, CustomerID DESC;
+   This will:
+
+   Sort the FirstName alphabetically in ascending order (since ASC is the default).
+   For rows with the same FirstName, it will sort the CustomerID in descending order.
+   Note on NULL Values:
+   NULL values are treated specially. They represent missing or empty values.
+   In the order, NULL values are considered to come before other values when sorting in ascending order and after other values when sorting in descending order.
+
+   Using Integer Abbreviations with ORDER BY
+   A useful tip for simplifying queries is using integer abbreviations for column names in the ORDER BY clause. Instead of referencing the column name directly, you can use numbers to refer to the position of the columns in the SELECT statement. For example:
+
+   1 refers to the first column.
+   2 refers to the second column, and so on.
+   This can be especially handy when dealing with multiple columns and when you want to reduce the length of your query.
+
+   Example 1: Ordering by Column Positions
+   Let’s say we want to retrieve the FirstName and CustomerID from the Customers table, and order the results by the first column (FirstName) in ascending order and by the second column (CustomerID) in ascending order as well. Using column positions, the query would look like this:
+
+
+   SELECT FirstName, CustomerID
+   FROM Customers
+   ORDER BY 1, 2;
+   In this query:
+
+   1 refers to the FirstName column.
+   2 refers to the CustomerID column.
+   Since we did not specify ASC or DESC, ascending order (ASC) is applied by default.
+
+   Example 2: Ordering by Column Positions in Descending Order
+   If you want to sort the results in descending order for both columns, the query would be:
+
+
+   SELECT FirstName, CustomerID
+   FROM Customers
+   ORDER BY 1 DESC, 2 DESC;
+   In this case:
+
+   1 DESC sorts FirstName in descending order.
+   2 DESC sorts CustomerID in descending order.
+   This method can help simplify queries, especially when working with tables that contain many columns or when the column names are long.
+
+   Using the LIMIT Keyword
+   The LIMIT keyword allows you to restrict the number of records returned by a query, which is particularly useful when you're only interested in a subset of data, such as the top results.
+
+   Syntax
+
+   SELECT [COLUMNS LIST]
+   FROM [TABLE NAME]
+   LIMIT [n];
+   [n] specifies the number of rows to retrieve.
+   The query will retrieve the first n records from the result set, after applying any conditions in the WHERE or ORDER BY clauses.
+
+   Example: Limiting the Number of Results
+   Imagine a store manager wants to identify the five most expensive items in the catalog. You can achieve this by using LIMIT in conjunction with ORDER BY to sort the data in descending order of price:
+
+
+   SELECT ProductName, NetRetailPrice
+   FROM Products
+   ORDER BY NetRetailPrice DESC
+   LIMIT 5;
+   This will retrieve the top 5 most expensive products from the Products table. If you change the LIMIT value to 4, it will return the top 4 most expensive items instead.
+
+   Syntax in SQL Server (Equivalent)
+   In SQL Server, you would use TOP instead of LIMIT:
+
+
+   SELECT TOP [n] [COLUMN LIST]
+   FROM [TABLE NAME]
+   ORDER BY [COLUMN_NAME] [ASC|DESC];
+   Using the DISTINCT Keyword
+   The DISTINCT keyword ensures that only unique (non-duplicate) records are returned in the result set.
+
+   Syntax
+
+   SELECT DISTINCT [COLUMNS LIST]
+   FROM [TABLE NAME];
+   When used with one column, DISTINCT removes duplicate entries in that column. When used with multiple columns, DISTINCT removes rows where all the selected columns are identical.
+
+   Example: Removing Duplicates
+   Let's say we have a Customers1 table that contains duplicate values in the FirstName and LastName columns. You can remove duplicates from the results by using the DISTINCT keyword.
+
+
+   SELECT DISTINCT FirstName, LastName
+   FROM Customers1;
+   This query ensures that only unique combinations of FirstName and LastName are included in the results.
+
+   If you want to remove duplicates based on just one column, like FirstName, you can write:
+
+   SELECT DISTINCT FirstName
+   FROM Customers1;
+   This will return only unique FirstName values, excluding duplicates.
+
+   Summary
+   Use LIMIT to restrict the number of rows returned by a query.
+   Use DISTINCT to eliminate duplicate values from the results, either for individual columns or for combinations of columns.
+
+Using Mathematical Expressions
+Mathematical expressions can help you calculate values on the fly from existing data in your database. You can use basic arithmetic operations like addition, subtraction, multiplication, and division to create calculated fields directly in your SQL queries.
+
+Example 1: Calculating the Line Item Total
+In many cases, you may need to calculate values based on fields that already exist. For example, to calculate the line item total for each product in an order, you can multiply the Quantity by the UnitPrice from the OrderItems table. This is a simple mathematical expression.
+
+
+SELECT ProductID, Quantity, UnitPrice, (Quantity * UnitPrice) AS 'Line Item Total'
+FROM OrderItems;
+This query will return the product ID, quantity, unit price, and the calculated line item total (quantity * unit price). Notice that the result for the line item total is given an alias ('Line Item Total').
+
+Example 2: Calculating the Price After Discount
+To calculate the price after applying a discount, you can use a similar approach but also incorporate the Discount field.
+
+
+SELECT ProductID, Quantity, UnitPrice, (Quantity * UnitPrice) AS 'Line Item Total',
+       Discount, ((Quantity * UnitPrice) - (Quantity * Discount)) AS 'Price After Discount'
+FROM OrderItems;
+Here, the Price After Discount is calculated by subtracting the discount amount (calculated as Quantity * Discount) from the Line Item Total.
+
+Exercise: Extracting the Top Five Highest Priced Items
+Now let's work on an example where we need to generate a report for the five highest-priced items based on their net retail price. The report should show the following columns:
+
+Product Name
+Product Retail Price
+Available Quantity
+Total Price of Available Quantity (calculated as the net retail price multiplied by the available quantity)
+Query Steps:
+Retrieve the required columns.
+Calculate the Total Price of Available Quantity using multiplication (NetRetailPrice * AvailableQuantity).
+Sort the result by NetRetailPrice in descending order to get the highest prices.
+Limit the result to the top 5 products.
+Here's the query:
+
+
+SELECT ProductName, NetRetailPrice AS 'Product Retail Price', AvailableQuantity,
+       (NetRetailPrice * AvailableQuantity) AS 'Total Price of Available QTY'
+FROM Products
+ORDER BY NetRetailPrice DESC
+LIMIT 5;
+This query retrieves the ProductName, NetRetailPrice, AvailableQuantity, and the Total Price of Available Quantity.
+The result is ordered by NetRetailPrice in descending order to ensure the highest priced items come first.
+Finally, the LIMIT 5 clause ensures that only the top 5 highest-priced items are included in the result.
+Summary of Key Concepts:
+Mathematical expressions in SQL allow you to perform calculations directly in your queries.
+The * operator (multiplication) can be used to calculate fields such as the line item total or total price after discount.
+The ORDER BY clause sorts data, while the LIMIT clause restricts the number of records.
+Use aliases (AS) to rename columns in the result set for clarity.
+In the next chapter, you'll learn how to refine your results even further by using the WHERE clause to filter data based on specific conditions.
+
+   Chapter 5 Shaping Data with the where Clause
+
+   In SQL, the WHERE clause is essential for filtering the records that meet specific conditions. It allows us to retrieve data that matches particular criteria, ensuring that only the relevant records are included in the result set.
+
+   The Syntax of the WHERE Clause
+   The general structure of a query with the WHERE clause is as follows:
+
+
+   SELECT [COLUMNS LIST]
+   FROM [TABLE NAME]
+   WHERE [CONDITION]
+   ORDER BY [COLUMN NAME] [ASC|DESC];
+   The WHERE clause is placed after the FROM clause and is used to filter records based on a condition. The condition is typically a logical expression that compares columns to values or other columns.
+
+   Common Conditional Operators
+   You can use various conditional operators in the WHERE clause to compare values, such as:
+
+   =: Equal to
+   >: Greater than
+   <: Less than
+   >=: Greater than or equal to
+   <=: Less than or equal to
+   <>: Not equal to (also != in some systems)
+   BETWEEN: Between a range of values
+   IN: Within a set of values
+   LIKE: Pattern matching (usually for text fields)
+   IS NULL: To check for NULL values
+   Important Note: The fields or values being compared must have compatible data types.
+
+   Practical Example 1: Filtering Data Based on a Single Condition
+   Using the Student table, you can retrieve all students enrolled in the "Electronics" course with the following query:
+
+
+   SELECT *
+   FROM Student
+   WHERE course = 'Electronics';
+   This query filters the students who are enrolled in the "Electronics" course, returning only those records.
+
+   Exercise 5.01: Implementing Logical Operators in the WHERE Clause
+   The store manager wants to retrieve products with a net retail price over $14.99 and label them as high-value products.
+
+   Here’s how to perform this query:
+
+
+   USE PACKT_ONLINE_SHOP;
+   SELECT ProductName AS 'High-value Products', NetRetailPrice
+   FROM Products
+   WHERE NetRetailPrice > 14.99;
+   This query retrieves all products where the NetRetailPrice is greater than $14.99.
+
+   Additional modification: If the manager also wants products priced at exactly $14.99, you can use the >= operator:
+
+
+   USE PACKT_ONLINE_SHOP;
+   SELECT ProductName AS 'High-value Products', NetRetailPrice
+   FROM Products
+   WHERE NetRetailPrice >= 14.99;
+   This query will include products priced at or greater than $14.99.
+
+   Practical Example 2: Using the BETWEEN Operator
+   The BETWEEN operator allows you to filter data within a specific range. For instance, to list products with prices between $14.99 and $50:
+
+
+   SELECT ProductName, NetRetailPrice
+   FROM Products
+   WHERE NetRetailPrice BETWEEN 14.99 AND 50
+   ORDER BY NetRetailPrice;
+   This query retrieves products with prices in the specified range and orders them by NetRetailPrice.
+
+   Key Takeaways:
+   The WHERE clause filters results based on specified conditions.
+   You can use logical operators like >, <, =, BETWEEN, and IN to specify conditions.
+   The BETWEEN operator is especially useful for filtering values within a range.
+   The WHERE clause is applied before the ORDER BY clause.
+   In the next chapter, you'll explore more advanced ways to filter and manipulate your data using AND, OR, and other operators.
+
+The Not Equal Operator
+In SQL, the Not Equal operator can be used to filter records where two values are not equal. SQL supports two symbols for this operator:
+
+!=
+<>
+Both symbols perform the same function and can be used interchangeably to exclude conditions where the values are equal in the result set.
+
+Exercise 5.03: Using the != and <> Operators
+The store manager wants to exclude tomato sauce from the list of available products. Here's how you can write the query using both the != and <> operators:
+
+Using the != operator:
+
+SELECT ProductName, NetRetailPrice
+FROM Products
+WHERE ProductName != 'tomato sauce'
+ORDER BY NetRetailPrice;
+This query will retrieve all products except the tomato sauce and order them by their net retail price.
+
+Using the <> operator (alternative to !=):
+
+
+SELECT ProductName, NetRetailPrice
+FROM Products
+WHERE ProductName <> 'tomato sauce'
+ORDER BY NetRetailPrice;
+This query will yield the same result as the previous one. Both operators (!= and <>) will exclude "tomato sauce" from the list.
+
+The LIKE Operator
+The LIKE operator is used when you need to search for a pattern in a text field. You can use wildcards in the pattern to match various text values. There are two main wildcards:
+
+%: Represents zero or more characters.
+_: Represents exactly one character.
+Syntax:
+
+SELECT [COLUMNS LIST]
+FROM [TABLE NAME]
+WHERE [COLUMN NAME] LIKE '[PATTERN]'
+Practical Example of the LIKE Operator:
+Suppose you want to find all customers whose first name has the letter "o" in the second position. You can write the following query:
+
+
+SELECT FirstName, LastName, Phone
+FROM Customers
+WHERE FirstName LIKE '_o%';
+This query searches for first names where the second character is "o". The result might include names like "Joe", "Rona", etc.
+
+Exercise 5.04: Using the LIKE Operator to Check a Pattern at the Beginning of a String
+The store manager wants to find customers from LA. Although there is no specific field for the state, you can filter customers whose phone number starts with the area code (310):
+
+Query:
+
+SELECT FirstName AS 'Customers from LA', Phone
+FROM Customers
+WHERE Phone LIKE '(310)%';
+This query filters customers whose phone numbers begin with "(310)", which corresponds to the LA area code.
+Exercise 5.05: Using the LIKE Operator to Check for a Specified Length
+The manager needs to generate usernames from customer first names. However, the system does not allow usernames with only three letters. To generate a report of customers with three-letter first names:
+
+Query:
+SELECT FirstName, LastName, Phone
+FROM Customers
+WHERE FirstName LIKE '___';
+This query uses the LIKE operator with three underscores ('___') to match first names that are exactly three characters long.
+Handling NULLs
+In SQL, NULL represents missing or unknown data. To handle NULL values, you can use the IS NULL or IS NOT NULL conditions.
+
+For example, if you want to find all customers who haven't provided a phone number (i.e., their phone number is NULL):
+
+
+SELECT FirstName, LastName
+FROM Customers
+WHERE Phone IS NULL;
+Conversely, to find customers who have provided a phone number:
+
+
+SELECT FirstName, LastName
+FROM Customers
+WHERE Phone IS NOT NULL;
+Summary of Key Operators:
+Not Equal: Use != or <> to exclude certain values.
+LIKE: Use wildcards like % (multiple characters) and _ (single character) to find matching patterns in string data.
+NULL Handling: Use IS NULL or IS NOT NULL to filter records with or without NULL values.
+By combining these operators in the WHERE clause, you can create powerful filters to extract exactly the data you need.
+
+
+
+Checking for NULL Values
+In SQL, NULL represents a missing or undefined value. It is important to note that NULL is not the same as an empty string, 0, or spaces; it simply means no data has been entered for that particular field. To handle NULL values in SQL, we use the following keywords:
+
+IS NULL: Used to find records where the column value is NULL.
+IS NOT NULL: Used to find records where the column value is not NULL.
+Exercise 5.06: Searching for NULL Values
+In this exercise, the goal is to retrieve customers with missing first names (i.e., NULL values in the FirstName field). The query to retrieve this information is as follows:
+
+
+SELECT MiddleName, LastName, Phone
+FROM Customers
+WHERE FirstName IS NULL;
+This query will return all records where the FirstName is NULL. You can then contact these customers to request their missing information.
+
+Combining Conditions with the AND, OR, and NOT Operators
+SQL allows you to combine multiple conditions using logical operators in the WHERE clause. These operators help filter records based on different criteria:
+
+AND: Ensures that both conditions must be true.
+OR: Ensures that at least one condition must be true.
+NOT: Excludes records where the condition following NOT is true.
+Exercise 5.07: Querying Multiple Conditions
+Let's break down a few examples of using these operators:
+
+Query for a specific customer (Joe) from LA: Joe, a customer from LA, wants to speak with the store manager. You can filter customers by both their first name and their phone number (which starts with the LA area code (310)):
+
+
+SELECT *
+FROM Customers
+WHERE FirstName = 'Joe' AND Phone LIKE '(310)%';
+This query ensures that only customers named Joe with a phone number starting with (310) are selected.
+
+Query for customers either named Joe or with a phone number from LA: If you want to retrieve customers who are either named Joe or whose phone number starts with (310), you can use the OR operator:
+
+
+SELECT FirstName, LastName, Phone
+FROM Customers
+WHERE FirstName = 'Joe' OR Phone LIKE '(310)%';
+This query will return all customers who are named Joe or whose phone number starts with (310).
+
+Using AND, OR, and NOT together: You can combine AND, OR, and NOT operators for more complex queries. For example, to retrieve customers whose first name starts with "Jo" and phone number starts with either (310) or (210), but who do not have the last name Carter, you would use:
+
+
+Copy code
+SELECT FirstName, LastName, Phone, Notes
+FROM Customers
+WHERE FirstName LIKE 'Jo%' AND (Phone LIKE '(310)%' OR Phone LIKE '(210)%') AND NOT LastName = 'Carter';
+This query applies multiple conditions:
+
+The first name starts with "Jo".
+The phone number starts with either (310) or (210).
+The last name is not "Carter".
+The use of parentheses ensures that the OR condition for phone numbers is evaluated first before combining with the AND condition for the first name.
+
+Activity 5.01: Combining Conditions to Extract Store Data
+As the store manager, you need to generate a report showing the following columns for products that meet specific criteria:
+
+Product Name
+Product Retail Price
+Available Quantity
+Total Price of Available Quantity
+The conditions are:
+
+The Net Retail Price must be less than or equal to $24.99.
+The Available Quantity must be at least 38 items.
+The Product Name must not start with "10".
+The SQL query to achieve this is as follows:
+
+Copy code
+SELECT ProductName, NetRetailPrice, AvailableQuantity, (NetRetailPrice * AvailableQuantity) AS TotalPrice
+FROM Products
+WHERE NetRetailPrice <= 24.99
+  AND AvailableQuantity >= 38
+  AND ProductName NOT LIKE '10%';
+This query retrieves all products that meet the specified conditions:
+
+The retail price is $24.99 or lower.
+At least 38 items are available.
+The product name does not start with "10".
+By combining the AND operator to ensure all conditions are true, and using the NOT LIKE operator to exclude products starting with "10", the query will generate the desired report.
+
+
+ Chapter 6 JOINS
+
+ Introduction to SQL Joins
+ In SQL, when you need to retrieve data from multiple related tables, you use joins. The JOIN operation allows you to combine rows from two or more tables based on a related column. This is especially useful because it is impractical to store all data in a single table, and managing multiple tables is more efficient.
+
+ In this chapter, the focus is on different types of joins, including:
+
+ INNER JOIN
+ RIGHT JOIN
+ LEFT JOIN
+ CROSS JOIN
+ UNION
+ Each type of join serves different use cases, but we'll begin by exploring the INNER JOIN.
+
+ INNER JOIN
+ The INNER JOIN is the most commonly used type of join. It selects records that have matching values in both tables involved in the join. When visualized in a Venn diagram, the INNER JOIN represents the intersection of the two tables, i.e., it only returns rows where there is a match in both tables.
+
+ INNER JOIN Syntax:
+ SELECT [Column List]
+ FROM [Table 1] INNER JOIN [Table 2]
+ ON [Table 1 Column Name] = [Table 2 Column Name]
+ WHERE [Condition];
+ Alternatively, the INNER keyword can be omitted, and the query can simply use JOIN:
+
+
+ SELECT [Column List]
+ FROM [Table 1] JOIN [Table 2]
+ ON [Table 1 Column Name] = [Table 2 Column Name]
+ WHERE [Condition];
+ In this case, the use of INNER is optional since JOIN defaults to an INNER JOIN.
+
+ Exercise 6.01: Extracting Orders and Purchaser Information
+ As a store manager, you need to extract the details of all orders and the corresponding customer details from the PACKT_ONLINE_SHOP database. To do this, you'll need to use an INNER JOIN between the Orders table and the Customers table.
+
+ Steps:
+ Identify Common Columns: The Orders table and the Customers table both contain a column named CustomerID. This is the column that will be used to join the two tables.
+
+ Orders.CustomerID
+ Customers.CustomerID
+ Write the SQL Query:
+
+ You can use the following query to retrieve the desired information:
+
+
+ SELECT Orders.OrderNumber, Orders.OrderStatus, Orders.OrderDate,
+        Customers.FirstName, Customers.LastName, Customers.Email
+ FROM Orders
+ JOIN Customers ON Orders.CustomerID = Customers.CustomerID;
+ In this query:
+
+ Orders.OrderNumber, Orders.OrderStatus, and Orders.OrderDate are selected from the Orders table.
+ Customers.FirstName, Customers.LastName, and Customers.Email are selected from the Customers table.
+ The JOIN operation is performed on the CustomerID column, which exists in both tables.
+ Execute the Query:
+
+ Once the query is executed, you will get the combined results of order information and customer details where CustomerID matches in both tables. The output might look like this (depending on the data in your database):
+
+ OrderNumber	OrderStatus	OrderDate	FirstName	LastName	Email
+ 1001	Shipped	2024-12-01	Joe	Smith	joe.smith@email.com
+ 1002	Pending	2024-12-02	Sarah	Johnson	sarah.j@email.com
+ 1003	Shipped	2024-12-03	John	Doe	john.doe@email.com
+ Notice that each order is matched with its respective customer's first name, last name, and email.
+
+ Key Points:
+ Ambiguity Prevention: To avoid ambiguity when columns have the same name in different tables (like CustomerID), it’s a good practice to prefix the column name with the table name (e.g., Orders.CustomerID and Customers.CustomerID).
+ INNER JOIN Result: The INNER JOIN only returns rows where there is a match in both tables.
+ In this example, you successfully extracted and displayed data from two tables using an INNER JOIN. This approach is a fundamental and powerful way to combine related data from different tables in SQL.
+
+ RIGHT JOIN
+ A RIGHT JOIN (or RIGHT OUTER JOIN) is used when you want to select all records from the second table (the one listed after the RIGHT JOIN keyword), along with the matching records from the first table. If there is no match between the first and second table, the query will still include records from the second table, but with NULL values in the columns of the first table. This is particularly useful when you need to ensure that all records from the second table are included in the result, even if there is no corresponding match in the first table.
+
+ The RIGHT JOIN can be visualized as the area of overlap between two tables (similar to an INNER JOIN) plus all the records from the second table that do not have matching records in the first table.
+
+ RIGHT JOIN Syntax:
+
+ SELECT [Column List]
+ FROM [Table 1] RIGHT OUTER JOIN [Table 2]
+ ON [Table 1 Column Name] = [Table 2 Column Name]
+ WHERE [Condition];
+ Alternatively, you can omit the OUTER keyword, and it will still work as a RIGHT JOIN:
+
+
+ SELECT [Column List]
+ FROM [Table 1] RIGHT JOIN [Table 2]
+ ON [Table 1 Column Name] = [Table 2 Column Name]
+ WHERE [Condition];
+ Exercise 6.02: Implementing RIGHT JOIN
+ In this exercise, we are tasked with retrieving a list of all customers along with their orders, including those customers who have not placed any orders yet. This is a perfect scenario to use a RIGHT JOIN, as it ensures we get all customers from the Customers table, even if there are no corresponding records in the Orders table.
+
+ Steps:
+ Write the SQL Query:
+
+ We want to retrieve the following columns:
+
+ FirstName, LastName, and Email from the Customers table.
+ OrderNumber and OrderStatus from the Orders table.
+ The query to retrieve the list of customers along with their orders, including those without any orders, will look like this:
+
+
+ SELECT Customers.FirstName,
+        Customers.LastName,
+        Customers.Email,
+        Orders.OrderNumber,
+        Orders.OrderStatus
+ FROM Orders
+ RIGHT JOIN Customers ON Orders.CustomerID = Customers.CustomerID;
+ Execute the Query:
+
+ After running this query, you will see a result where:
+
+ Customers who have placed orders will have their order details (OrderNumber and OrderStatus) displayed.
+ Customers who have not placed any orders will have NULL values for OrderNumber and OrderStatus.
+ Example output:
+
+ FirstName	LastName	Email	            OrderNumber	OrderStatus
+ Joe	    Smith	    joe.smith@email.com	1001	    Shipped
+ Sarah	    Johnson	    sarah.j@email.com	1002	    Pending
+ John	    Doe	        john.doe@email.com	NULL	    NULL
+ List Only Customers Who Haven't Ordered:
+
+ To extract the list of customers who haven't placed any orders, you can modify the query to filter for NULL values in the OrderNumber field, as this would indicate that no order has been placed for those customers.
+
+ The modified query would be:
+
+
+ SELECT Customers.FirstName,
+        Customers.LastName,
+        Customers.Email,
+        Orders.OrderNumber,
+        Orders.OrderStatus
+ FROM Orders
+ RIGHT JOIN Customers ON Orders.CustomerID = Customers.CustomerID
+ WHERE Orders.OrderNumber IS NULL;
+ This query will return only the customers who have not placed any orders. The result might look like this:
+
+ Example output:
+
+ FirstName	LastName	Email	        OrderNumber	OrderStatus
+ John	    Doe	   john.doe@email.com	NULL	    NULL
+ Key Points About RIGHT JOIN:
+ The RIGHT JOIN ensures that all records from the second table (in this case, Customers) are returned, even if there are no matching records in the first table (in this case, Orders).
+ If there is no match in the first table, the columns from the first table will contain NULL values in the result.
+ The RIGHT JOIN is useful when you need to ensure that every record from the second table is included in the result, regardless of whether there is a corresponding match in the first table.
+ This example illustrates how to use the RIGHT JOIN to combine data from two tables and ensure that all records from one table are returned, even if there is no matching data in the other table.
+
+
+LEFT JOIN
+A LEFT JOIN (or LEFT OUTER JOIN) is used when you want to select all records from the first table (the one listed before the LEFT JOIN keyword), and the matching records from the second table (the one listed after the LEFT JOIN keyword). If there is no match, the query will still include records from the first table, but with NULL values for the columns of the second table.
+
+This can be visualized as the area of overlap between two tables (similar to an INNER JOIN) plus all the records from the first table that do not have corresponding matches in the second table.
+
+LEFT JOIN Syntax:
+SELECT [Column List]
+FROM [Table 1] LEFT OUTER JOIN [Table 2]
+ON [Table 1 Column Name] = [Table 2 Column Name]
+WHERE [Condition];
+Alternatively, you can omit the OUTER keyword, and it will still work as a LEFT JOIN:
+
+SELECT [Column List]
+FROM [Table 1] LEFT JOIN [Table 2]
+ON [Table 1 Column Name] = [Table 2 Column Name]
+WHERE [Condition];
+Exercise 6.03: Implementing LEFT JOIN
+In this exercise, we need to retrieve the order information along with payment details. Specifically, we want to list only those orders that have payment information.
+
+Steps:
+Write the SQL Query:
+
+We want to retrieve the following columns:
+
+OrderNumber and OrderStatus from the Orders table.
+PaymentRef and PaymentType from the Payments table.
+Since we are interested in orders that have payments, we will start the join with the Payments table. This ensures that we only retrieve records from the Orders table that have matching payment information.
+
+ SELECT Orders.OrderNumber,
+       Orders.OrderStatus,
+       Payments.PaymentRef,
+       Payments.PaymentType
+FROM Payments
+LEFT JOIN Orders ON Payments.OrderID = Orders.OrderID;
+Execute the Query:
+
+After executing this query, the result will include:
+
+Orders that have payments (matching records between Payments and Orders).
+Orders without payments will be excluded from the result because the LEFT JOIN filters out those without matches in the Orders table.
+Example output:
+
+OrderNumber	OrderStatus	    PaymentRef	PaymentType
+101	        Shipped	        12345	    Credit Card
+102     	Pending	        12346	    PayPal
+103     	Shipped	        NULL	    NULL
+Alternative Query (Join in Reverse Order):
+
+Now, let's change the order of the tables and join starting with the Orders table instead of Payments. In this case, we will retrieve all orders, including those without payments.
+
+The query will look like this:
+
+SELECT Orders.OrderNumber,
+       Orders.OrderStatus,
+       Payments.PaymentRef,
+       Payments.PaymentType
+FROM Orders
+LEFT JOIN Payments ON Payments.OrderID = Orders.OrderID;
+After running this query, you will get all orders, even those without payment information. For orders without payments, the payment columns will have NULL values.
+
+Example output:
+
+OrderNumber	OrderStatus	        PaymentRef	            PaymentType
+101	        Shipped	            12345	                Credit Card
+102	        Pending	            12346	                PayPal
+103	        Shipped	            NULL	                NULL
+104	        Pending	            NULL	                NULL
+
+Key Points About LEFT JOIN:
+The LEFT JOIN ensures that all records from the first table (in this case, Orders) are included in the result set, regardless of whether there is a match in the second table (in this case, Payments).
+If there is no matching record in the second table, the query will still return the record from the first table, but the columns from the second table will be filled with NULL values.
+The order in which you list the tables in the LEFT JOIN matters. If you want to ensure that all records from the first table are included, start the join with the first table.
+This example illustrates how to use the LEFT JOIN to retrieve information about orders and their payments, ensuring that orders without payments are included in the results.
+
+CROSS JOIN
+A CROSS JOIN is used to combine each record from the first table with every record from the second table, creating a Cartesian product. This means that each record in the first table is paired with all records in the second table. This type of join does not require a condition because the goal is to combine all rows from both tables.
+
+CROSS JOIN Syntax:
+Copy code
+SELECT [Column List]
+FROM [Table 1] CROSS JOIN [Table 2]
+WHERE [Condition];
+However, unlike other types of joins, the WHERE condition is generally not needed for a CROSS JOIN, as the operation is meant to combine all rows from both tables in every possible way.
+
+Implementing CROSS JOIN
+In this exercise, we want to generate all possible combinations between two sets of data: one representing card values and the other representing card suits. The goal is to cross-reference all the suits with all the card values to generate every possible combination (like a deck of cards).
+
+Steps:
+Create the Facecards Table:
+
+First, we will create a table called Facecards and insert some card values into it.
+
+
+Copy code
+CREATE TABLE Facecards (cardvalue VARCHAR(50));
+
+INSERT INTO Facecards (cardvalue) VALUES ('King');
+INSERT INTO Facecards (cardvalue) VALUES ('Queen');
+INSERT INTO Facecards (cardvalue) VALUES ('Jack');
+INSERT INTO Facecards (cardvalue) VALUES ('Ace');
+Create the CardSuit Table:
+
+Now, we will create another table called CardSuit and insert different card suits into it.
+
+
+Copy code
+CREATE TABLE CardSuit (suit VARCHAR(50));
+
+INSERT INTO CardSuit (suit) VALUES ('Heart');
+INSERT INTO CardSuit (suit) VALUES ('Spade');
+INSERT INTO CardSuit (suit) VALUES ('Clubs');
+INSERT INTO CardSuit (suit) VALUES ('Diamond');
+Execute the CROSS JOIN Query:
+
+Now we can perform the CROSS JOIN to generate all possible combinations between the card values (Facecards) and suits (CardSuit):
+
+Copy code
+SELECT Facecards.cardvalue,
+       CardSuit.suit
+FROM Facecards CROSS JOIN CardSuit;
+Output:
+
+After executing the query, the result will contain every combination of the card values with the suits, as shown in the example below:
+
+cardvalue	suit
+King	Heart
+King	Spade
+King	Clubs
+King	Diamond
+Queen	Heart
+Queen	Spade
+Queen	Clubs
+Queen	Diamond
+Jack	Heart
+Jack	Spade
+Jack	Clubs
+Jack	Diamond
+Ace	Heart
+Ace	Spade
+Ace	Clubs
+Ace	Diamond
+As you can see, the CROSS JOIN has generated all combinations of the card values and suits.
+
+Key Points About CROSS JOIN:
+CROSS JOIN is used to produce a Cartesian product of two tables, meaning every row from the first table is combined with every row from the second table.
+It does not require any condition to join the tables, as it creates all possible pairings.
+This type of join can generate large result sets if the tables involved have many records. For example, if the first table has 10 rows and the second table has 5 rows, the result set will contain 50 rows.
+This example demonstrates how to use a CROSS JOIN to generate combinations of card values and suits, similar to generating a full deck of cards.
+
+UNION JOIN
+The UNION operation in SQL is used to combine the results of two or more SELECT queries into a single result set. It essentially appends the rows from one query to the rows of another, eliminating any duplicates by default. The result is a unified list of data from both queries.
+
+Key Points to Remember When Using UNION:
+Same Number of Columns: Both queries must select the same number of columns.
+Similar Data Types: The columns being combined must have compatible data types.
+Order of Columns: The order of the columns in both queries must be the same.
+Elimination of Duplicates: By default, UNION removes duplicate rows in the final result. If you want to include duplicates, you can use UNION ALL.
+UNION Syntax:
+
+Copy code
+SELECT [Column List]
+FROM [Table1]
+UNION
+SELECT [Column List]
+FROM [Table2];
+Exercise 6.05: Implementing a UNION JOIN
+In this exercise, the store manager wants to collect feedback from both customers and suppliers. The goal is to create a list that includes both their full names and contact numbers.
+
+Steps:
+Create the Query: We want to retrieve the full names and phone numbers of both customers and suppliers, combining them into a single result set. The first query retrieves the customer's full name (using the CONCAT function to merge first and last names) and phone number. The second query retrieves the full name and phone number of suppliers.
+
+Here's the SQL query:
+
+
+Copy code
+SELECT CONCAT(Customers.FirstName, ' ', Customers.LastName) AS 'Full Name',
+       Customers.Phone AS 'Phone Number'
+FROM Customers
+UNION
+SELECT Suppliers.ContactPerson AS 'Full Name',
+       Suppliers.PhoneNumber AS 'Phone Number'
+FROM Suppliers;
+CONCAT: This function combines the first and last names of customers into a single column labeled 'Full Name'.
+The UNION keyword combines the results of the two queries into one list of full names and phone numbers.
+Execute the Query: After executing the query, the output will display a list of full names and phone numbers from both customers and suppliers.
+
+Full Name	Phone Number
+John Doe	123-456-7890
+Jane Smith	987-654-3210
+Bob Johnson	555-111-2222
+Alice Williams	333-444-5555
+As shown in the result, both customers and suppliers are listed together, with their names and phone numbers.
+
+Key Points About UNION:
+The UNION operation automatically removes duplicate records, so if there are customers and suppliers with the same names or phone numbers, they will appear only once in the final result.
+If you want to include all records, even the duplicates, you can use UNION ALL instead.
+For example:
+
+
+Copy code
+SELECT [Column List] FROM [Table1]
+UNION ALL
+SELECT [Column List] FROM [Table2];
+This will keep all records, including duplicates, in the final result set.
+
+Summary of Joins:
+In this chapter, we have covered various types of joins that allow us to retrieve data from multiple tables:
+
+INNER JOIN: Retrieves records with matching values from both tables.
+RIGHT JOIN: Retrieves all records from the second table and matching records from the first table.
+LEFT JOIN: Retrieves all records from the first table and matching records from the second table.
+CROSS JOIN: Combines every row from the first table with every row from the second table.
+UNION: Combines results from two queries into a single result set, removing duplicates by default.
+Each of these joins has specific use cases, and by understanding how to implement them, you can efficiently combine and manipulate data from multiple tables.
+
 
